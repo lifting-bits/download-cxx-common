@@ -1,0 +1,24 @@
+{
+  "name": "download-cxx-common",
+  "version": "1.0.0",
+  "description": "Download cxx-common github action",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xlauko/download-cxx-common.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xlauko/download-cxx-common/issues"
+  },
+  "homepage": "https://github.com/xlauko/download-cxx-common#readme",
+  "dependencies": {
+    "@actions/core": "^1.6.0",
+    "@actions/github": "^5.0.1"
+  }
+}
