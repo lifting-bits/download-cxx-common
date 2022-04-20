@@ -1,0 +1,14 @@
+name: Test the action
+
+on: [push]
+
+jobs:
+  custom_test:
+    runs-on: ubuntu-latest
+    name: Test action locally
+    steps:
+      - name: Test download-cxx-common
+        # Use the action defined in this repository
+        uses: ./
+        with:
+          llvm: 13
