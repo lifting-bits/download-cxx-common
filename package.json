@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "release": "ncc build lib/download-download-cxx-common.ts && git add -f dist/",
+    "release": "ncc build lib/download-cxx-common.ts && git add -f dist/",
     "check-all": "concurrently \"npm:format-check\" \"npm:lint\" \"npm:build\"",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@types/node": "^17.0.25",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
     "@typescript-eslint/parser": "^5.20.0",
     "@vercel/ncc": "^0.33.4",
     "concurrently": "^7.1.0",
