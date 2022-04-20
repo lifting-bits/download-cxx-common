@@ -41,6 +41,9 @@ build/Release
 node_modules/
 jspm_packages/
 
+# Ignore js files that are transpiled from ts files in src/
+lib/
+
 # TypeScript v1 declaration files
 typings/
 
