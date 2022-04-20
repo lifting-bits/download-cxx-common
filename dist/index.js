@@ -40,10 +40,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
+const os = __importStar(__nccwpck_require__(37));
+const path_1 = __nccwpck_require__(17);
+// resolve tilde expansions, path.replace only replaces the first occurrence of a pattern
+function resolve_path(path) {
+    if (path.startsWith(`~`)) {
+        return (0, path_1.resolve)(path.replace('~', os.homedir()));
+    }
+    else {
+        return (0, path_1.resolve)(path);
+    }
+}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const llvm = core.getInput('llvm');
-        core.info(`Downloading cxx-common with llvm-${llvm}`);
+        const llvm = core.getInput('llvm', { required: true });
+        const version = core.getInput('version', { required: true });
+        const destination = resolve_path(core.getInput('path'));
+        core.debug(`Resolved path is ${destination}`);
+        core.info(`Downloading cxx-common:${version} with llvm-${llvm}`);
     });
 }
 // Our main method: call the run() function and report any errors
