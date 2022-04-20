@@ -1,15 +1,13 @@
 name: 'Download a cxx-common'
 description: 'Download a specific version of cxx-common artifact'
 inputs:
-  arch:
-    description: 'Target architecture'
-    required: true
   llvm:
     description: 'LLVM version'
     required: true
   version:
     description: 'cxx-common version'
     required: false
+    default: latest
 runs:
   using: 'node16'
   main: 'dist/index.js'
