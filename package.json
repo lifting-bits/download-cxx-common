@@ -4,15 +4,20 @@
   "description": "Download cxx-common github action",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "release": "ncc build lib/download-download-cxx-common.ts && git add -f dist/",
+    "check-all": "concurrently \"npm:format-check\" \"npm:lint\" \"npm:build\"",
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts",
+    "lint": "eslint **/*.ts"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xlauko/download-cxx-common.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Henrich Lauko",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/xlauko/download-cxx-common/issues"
   },
@@ -20,5 +25,15 @@
   "dependencies": {
     "@actions/core": "^1.6.0",
     "@actions/github": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.25",
+    "@typescript-eslint/parser": "^5.20.0",
+    "@vercel/ncc": "^0.33.4",
+    "concurrently": "^7.1.0",
+    "eslint": "^8.13.0",
+    "eslint-plugin-github": "^4.3.6",
+    "prettier": "^2.6.2",
+    "typescript": "^4.6.3"
   }
 }
