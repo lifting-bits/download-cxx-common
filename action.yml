@@ -8,6 +8,9 @@ inputs:
     description: 'cxx-common version'
     required: false
     default: latest
+  path:
+    description: 'Destination path'
+    required: false
 runs:
   using: 'node16'
   main: 'dist/index.js'
