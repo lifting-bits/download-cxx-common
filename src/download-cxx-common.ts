@@ -8,9 +8,6 @@ import * as fs from 'fs'
 import {exec} from 'child_process'
 import {https} from 'follow-redirects'
 
-import * as cache from '@actions/cache'
-
-
 interface GetReleaseOptions {
     readonly owner: string
     readonly repo: string
@@ -87,12 +84,6 @@ async function run(): Promise<void> {
     core.setOutput('path', `${destination}/${name}`)
     core.setOutput('artifact', name)
 
-    // try to restore from cache
-    const result = await cache.restoreCache([destination], name)
-    if (result !== undefined) {
-        return core.info("cxx-common restored from cache")
-    }
-
     // download the release asset
     const download_dir = fs.mkdtempSync(path.join(os.tmpdir(), `download-cxx-common`));
     const tarball = `${download_dir}/${tar_name}`
@@ -114,10 +105,6 @@ async function run(): Promise<void> {
 
     // clean up
     fs.rmSync(download_dir, { recursive: true, force: true });
-
-    // store cxx-common artifact to cache
-    await cache.saveCache([destination, `${destination}/${name}`], name)
-    core.info(`Cache saved with key: ${name}`)
 }
 
 // Our main method: call the run() function and report any errors
