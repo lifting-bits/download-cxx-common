@@ -85,6 +85,7 @@ async function run(): Promise<void> {
 
     // setup output
     core.setOutput('path', `${destination}/${name}`)
+    core.setOutput('artifact', name)
 
     // try to restore from cache
     const result = await cache.restoreCache([destination], name)

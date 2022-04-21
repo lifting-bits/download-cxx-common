@@ -105,6 +105,7 @@ function run() {
         core.debug(`Resolved path is ${destination}`);
         // setup output
         core.setOutput('path', `${destination}/${name}`);
+        core.setOutput('artifact', name);
         // try to restore from cache
         const result = yield cache.restoreCache([destination], name);
         if (result) {

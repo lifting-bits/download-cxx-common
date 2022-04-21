@@ -31,7 +31,9 @@ inputs:
 
 outputs:
   path:
-    description: 'The cxx-common unapacked release artifact directory'
+    description: 'The cxx-common unpacked release artifact directory'
+  artifact:
+    description: 'The cxx-common artifact name'
 
 runs:
   using: 'node16'
