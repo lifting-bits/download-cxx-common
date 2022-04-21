@@ -10,12 +10,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Cache cxx-common
-        uses: actions/cache@v3
-        with:
-          path: "./install"
-          key: cxx-common-cache-artifact
-
       - name: Test download-cxx-common
         # Use the action defined in this repository
         id: cxxcommon
