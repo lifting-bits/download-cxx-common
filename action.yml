@@ -9,9 +9,9 @@ inputs:
     description: 'The cxx-common version to fetch from in the form `v?.?.?` or `release name`.'
     required: false
     default: 'latest'
-  path:
+  destination:
     description: 'Destination path'
-    required: false
+    required: true
   arch:
     description: 'The cxx-common target architecture'
     required: false
