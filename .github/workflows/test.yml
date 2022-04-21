@@ -12,6 +12,16 @@ jobs:
 
       - name: Test download-cxx-common
         # Use the action defined in this repository
+        id: cxxcommon
         uses: ./
         with:
           llvm: 13
+          version: v0.2.2
+          token: ${{ secrets.GITHUB_TOKEN }}
+          destination: ./install
+
+      - name: Test paths
+        shell: bash
+        run: |
+          echo ${{ steps.cxxcommon.outputs.path }}
+

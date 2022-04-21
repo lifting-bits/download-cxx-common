@@ -1,16 +1,42 @@
 name: 'Download a cxx-common'
 description: 'Download a specific version of cxx-common artifact'
+
 inputs:
   llvm:
     description: 'LLVM version'
     required: true
   version:
-    description: 'cxx-common version'
+    description: 'The cxx-common version to fetch from in the form `v?.?.?` or `release name`.'
     required: false
-    default: latest
+    default: 'latest'
   path:
     description: 'Destination path'
     required: false
+  arch:
+    description: 'The cxx-common target architecture'
+    required: false
+    default: 'amd64'
+  image:
+    description: 'The cxx-common target system image'
+    required: false
+    default: 'ubuntu'
+  image_tag:
+    description: 'The cxx-common target system image tag'
+    required: false
+    default: '20.04'
+  token:
+    description: 'The GitHub token. Typically this will be secrets.GITHUB_TOKEN'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  path:
+    description: 'The cxx-common unapacked release artifact directory'
+
 runs:
   using: 'node16'
   main: 'dist/index.js'
+
+branding:
+  icon: 'download-cloud'
+  color: 'orange'
