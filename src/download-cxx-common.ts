@@ -89,7 +89,7 @@ async function run(): Promise<void> {
 
     // try to restore from cache
     const result = await cache.restoreCache([destination], name)
-    if (result) {
+    if (result !== undefined) {
         return core.info("cxx-common restored from cache")
     }
 
@@ -116,7 +116,8 @@ async function run(): Promise<void> {
     fs.rmSync(download_dir, { recursive: true, force: true });
 
     // store cxx-common artifact to cache
-    await cache.saveCache([destination], name)
+    await cache.saveCache([destination, `${destination}/${name}`], name)
+    core.info(`Cache saved with key: ${name}`)
 }
 
 // Our main method: call the run() function and report any errors

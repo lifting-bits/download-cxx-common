@@ -108,7 +108,7 @@ function run() {
         core.setOutput('artifact', name);
         // try to restore from cache
         const result = yield cache.restoreCache([destination], name);
-        if (result) {
+        if (result !== undefined) {
             return core.info("cxx-common restored from cache");
         }
         // download the release asset
@@ -129,7 +129,8 @@ function run() {
         // clean up
         fs.rmSync(download_dir, { recursive: true, force: true });
         // store cxx-common artifact to cache
-        yield cache.saveCache([destination], name);
+        yield cache.saveCache([destination, `${destination}/${name}`], name);
+        core.info(`Cache saved with key: ${name}`);
     });
 }
 // Our main method: call the run() function and report any errors
@@ -196,15 +197,6 @@ function checkKey(key) {
     }
 }
 /**
- * isFeatureAvailable to check the presence of Actions cache service
- *
- * @returns boolean return true if Actions cache service feature is available, otherwise false
- */
-function isFeatureAvailable() {
-    return !!process.env['ACTIONS_CACHE_URL'];
-}
-exports.isFeatureAvailable = isFeatureAvailable;
-/**
  * Restores cache from keys
  *
  * @param paths a list of file paths to restore from the cache
@@ -270,12 +262,18 @@ exports.restoreCache = restoreCache;
  * @returns number returns cacheId if the cache was saved successfully and throws an error if save fails
  */
 function saveCache(paths, key, options) {
-    var _a, _b, _c, _d, _e;
     return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(key);
         const compressionMethod = yield utils.getCompressionMethod();
-        let cacheId = null;
+        core.debug('Reserving Cache');
+        const cacheId = yield cacheHttpClient.reserveCache(key, paths, {
+            compressionMethod
+        });
+        if (cacheId === -1) {
+            throw new ReserveCacheError(`Unable to reserve cache with key ${key}, another job may be creating this cache.`);
+        }
+        core.debug(`Cache ID: ${cacheId}`);
         const cachePaths = yield utils.resolvePaths(paths);
         core.debug('Cache Paths:');
         core.debug(`${JSON.stringify(cachePaths)}`);
@@ -290,23 +288,8 @@ function saveCache(paths, key, options) {
             const fileSizeLimit = 10 * 1024 * 1024 * 1024; // 10GB per repo limit
             const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
             core.debug(`File Size: ${archiveFileSize}`);
-            // For GHES, this check will take place in ReserveCache API with enterprise file size limit
-            if (archiveFileSize > fileSizeLimit && !utils.isGhes()) {
+            if (archiveFileSize > fileSizeLimit) {
                 throw new Error(`Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
-            }
-            core.debug('Reserving Cache');
-            const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, paths, {
-                compressionMethod,
-                cacheSize: archiveFileSize
-            });
-            if ((_a = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a === void 0 ? void 0 : _a.cacheId) {
-                cacheId = (_b = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _b === void 0 ? void 0 : _b.cacheId;
-            }
-            else if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400) {
-                throw new Error((_d = (_c = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c === void 0 ? void 0 : _c.message) !== null && _d !== void 0 ? _d : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
-            }
-            else {
-                throw new ReserveCacheError(`Unable to reserve cache with key ${key}, another job may be creating this cache. More details: ${(_e = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _e === void 0 ? void 0 : _e.message}`);
             }
             core.debug(`Saving Cache (ID: ${cacheId})`);
             yield cacheHttpClient.saveCache(cacheId, archivePath, options);
@@ -363,7 +346,10 @@ const options_1 = __nccwpck_require__(6215);
 const requestUtils_1 = __nccwpck_require__(3981);
 const versionSalt = '1.0';
 function getCacheApiUrl(resource) {
-    const baseUrl = process.env['ACTIONS_CACHE_URL'] || '';
+    // Ideally we just use ACTIONS_CACHE_URL
+    const baseUrl = (process.env['ACTIONS_CACHE_URL'] ||
+        process.env['ACTIONS_RUNTIME_URL'] ||
+        '').replace('pipelines', 'artifactcache');
     if (!baseUrl) {
         throw new Error('Cache Service Url not found, unable to restore cache.');
     }
@@ -441,18 +427,18 @@ function downloadCache(archiveLocation, archivePath, options) {
 exports.downloadCache = downloadCache;
 // Reserve Cache
 function reserveCache(key, paths, options) {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
         const version = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
         const reserveCacheRequest = {
             key,
-            version,
-            cacheSize: options === null || options === void 0 ? void 0 : options.cacheSize
+            version
         };
         const response = yield requestUtils_1.retryTypedResponse('reserveCache', () => __awaiter(this, void 0, void 0, function* () {
             return httpClient.postJson(getCacheApiUrl('caches'), reserveCacheRequest);
         }));
-        return response;
+        return (_b = (_a = response === null || response === void 0 ? void 0 : response.result) === null || _a === void 0 ? void 0 : _a.cacheId) !== null && _b !== void 0 ? _b : -1;
     });
 }
 exports.reserveCache = reserveCache;
@@ -721,11 +707,6 @@ function assertDefined(name, value) {
     return value;
 }
 exports.assertDefined = assertDefined;
-function isGhes() {
-    const ghUrl = new URL(process.env['GITHUB_SERVER_URL'] || 'https://github.com');
-    return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
-}
-exports.isGhes = isGhes;
 //# sourceMappingURL=cacheUtils.js.map
 
 /***/ }),
@@ -1105,8 +1086,7 @@ function retryTypedResponse(name, method, maxAttempts = constants_1.DefaultRetry
                 return {
                     statusCode: error.statusCode,
                     result: null,
-                    headers: {},
-                    error
+                    headers: {}
                 };
             }
             else {
