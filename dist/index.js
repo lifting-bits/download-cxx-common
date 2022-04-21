@@ -103,6 +103,8 @@ function run() {
         // setup destionation path
         const destination = core.getInput('destination');
         core.debug(`Resolved path is ${destination}`);
+        // setup output
+        core.setOutput('path', `${destination}/${name}`);
         // try to restore from cache
         const result = yield cache.restoreCache([destination], name);
         if (result) {
@@ -127,8 +129,6 @@ function run() {
         fs.rmSync(download_dir, { recursive: true, force: true });
         // store cxx-common artifact to cache
         yield cache.saveCache([destination], name);
-        // setup output
-        core.setOutput('path', `${destination}/${name}`);
     });
 }
 // Our main method: call the run() function and report any errors

@@ -83,6 +83,9 @@ async function run(): Promise<void> {
     const destination = core.getInput('destination')
     core.debug(`Resolved path is ${destination}`)
 
+    // setup output
+    core.setOutput('path', `${destination}/${name}`)
+
     // try to restore from cache
     const result = await cache.restoreCache([destination], name)
     if (result) {
@@ -113,9 +116,6 @@ async function run(): Promise<void> {
 
     // store cxx-common artifact to cache
     await cache.saveCache([destination], name)
-
-    // setup output
-    core.setOutput('path', `${destination}/${name}`)
 }
 
 // Our main method: call the run() function and report any errors
