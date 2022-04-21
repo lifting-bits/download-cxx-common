@@ -24,4 +24,5 @@ jobs:
         shell: bash
         run: |
           echo ${{ steps.cxxcommon.outputs.path }}
+          ls -l ${{ steps.cxxcommon.outputs.path }}
 
